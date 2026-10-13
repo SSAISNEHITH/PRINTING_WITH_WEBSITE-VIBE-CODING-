@@ -1,0 +1,50 @@
+server:
+  port: 8080
+  servlet:
+    context-path: /
+
+spring:
+  application:
+    name: CaptivePortalPrintServer
+  security:
+    user:
+      name: admin
+      password: "${ADMIN_PASSWORD:changeme_before_deploy}"
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 10MB
+      max-request-size: 11MB
+      file-size-threshold: 1MB   # stream to memory, not disk
+      location: ""               # blank = memory buffering preferred
+
+  thymeleaf:
+    cache: false
+    prefix: classpath:/templates/
+    suffix: .html
+
+logging:
+  level:
+    root: WARN
+    com.captiveportal: INFO
+  file:
+    name: logs/printserver.log
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+
+# Application-specific configuration
+captive-portal:
+  # Maximum PDF size in bytes (10 MB)
+  max-pdf-size-bytes: 10485760
+  # Session/network cut-off in minutes after connection
+  session-timeout-minutes: 10
+  # Printer name – leave blank to use OS default printer
+  printer-name: ""
+  # Network interface name used for the hotspot (Windows: "Wi-Fi 2", Linux: "wlan0")
+  hotspot-interface: "Wi-Fi 2"
+  # Portal IP (the IP of this machine on the hotspot network)
+  portal-ip: "192.168.137.1"
+  # Temp directory override (blank = system temp, files deleted immediately after print)
+  temp-dir: ""
+  # Script directory for OS-level network ops
+  scripts-dir: "scripts"

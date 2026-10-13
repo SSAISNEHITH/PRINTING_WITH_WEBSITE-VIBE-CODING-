@@ -1,0 +1,5 @@
+2026-10-13T21:05:10.721+05:30  INFO 6868 --- [CaptivePortalPrintServer] [main] c.c.printserver.PrintServerApplication   : Starting PrintServerApplication v1.0.0 using Java 25 with PID 6868 (C:\ICCLASS_II\MyNeeds\PRINTAPPBCUWCANONG3000\target\print-server-1.0.0.jar started by SAISNEHITH in C:\ICCLASS_II\MyNeeds\PRINTAPPBCUWCANONG3000)
+2026-10-13T21:05:10.725+05:30  INFO 6868 --- [CaptivePortalPrintServer] [main] c.c.printserver.PrintServerApplication   : No active profile set, falling back to 1 default profile: "default"
+2026-10-13T21:05:13.641+05:30  INFO 6868 --- [CaptivePortalPrintServer] [main] c.c.printserver.PrintServerApplication   : Started PrintServerApplication in 3.697 seconds (process running for 4.532)
+2026-10-13T21:05:47.801+05:30  INFO 6868 --- [CaptivePortalPrintServer] [http-nio-8080-exec-1] c.c.p.controller.PortalController        : Portal page served to IP=0:0:0:0:0:0:0:1
+2026-10-13T21:07:08.593+05:30  INFO 6868 --- [CaptivePortalPrintServer] [http-nio-8080-exec-4] c.c.p.controller.PortalController        : Portal page served to IP=0:0:0:0:0:0:0:1

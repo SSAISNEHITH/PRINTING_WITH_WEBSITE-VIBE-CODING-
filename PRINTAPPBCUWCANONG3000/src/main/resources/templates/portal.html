@@ -1,0 +1,691 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <meta name="robots" content="noindex, nofollow"/>
+    <meta name="referrer" content="no-referrer"/>
+    <title>Secure Print Portal</title>
+    <meta name="description" content="Upload your PDF document to print securely. Your file is never stored."/>
+    <link rel="preconnect" href="https://fonts.googleapis.com"/>
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+    <style>
+        /* ──────────────────────────────────────────────────────────────
+           Design System Tokens
+        ────────────────────────────────────────────────────────────── */
+        :root {
+            --color-bg:           #0a0e1a;
+            --color-surface:      #111827;
+            --color-surface-2:    #1c2437;
+            --color-border:       rgba(99, 220, 219, 0.15);
+            --color-border-hover: rgba(99, 220, 219, 0.45);
+            --color-accent:       #3dd6d6;
+            --color-accent-glow:  rgba(61, 214, 214, 0.25);
+            --color-accent-dark:  #1ea8a8;
+            --color-text:         #e2e8f0;
+            --color-text-muted:   #64748b;
+            --color-text-dim:     #94a3b8;
+            --color-success:      #22c55e;
+            --color-success-bg:   rgba(34, 197, 94, 0.1);
+            --color-error:        #f87171;
+            --color-error-bg:     rgba(248, 113, 113, 0.1);
+            --color-warning:      #fbbf24;
+            --radius-card:        20px;
+            --radius-btn:         12px;
+            --shadow-card:        0 0 60px rgba(0,0,0,0.6), 0 0 0 1px rgba(99,220,219,0.08);
+            --shadow-glow:        0 0 30px rgba(61,214,214,0.2);
+            --font:               'Inter', system-ui, sans-serif;
+            --transition:         0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* ── Reset & Base ─────────────────────────────────────────── */
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        html, body {
+            height: 100%;
+            font-family: var(--font);
+            background: var(--color-bg);
+            color: var(--color-text);
+            -webkit-font-smoothing: antialiased;
+        }
+
+        body {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+            background:
+                radial-gradient(ellipse at 20% 20%, rgba(61,214,214,0.06) 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 80%, rgba(61,214,214,0.04) 0%, transparent 50%),
+                var(--color-bg);
+        }
+
+        /* ── Animated background grid ─────────────────────────────── */
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background-image:
+                linear-gradient(rgba(99,220,219,0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(99,220,219,0.03) 1px, transparent 1px);
+            background-size: 40px 40px;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* ── Card ─────────────────────────────────────────────────── */
+        .card {
+            position: relative;
+            z-index: 1;
+            background: var(--color-surface);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-card);
+            padding: 48px 44px;
+            width: 100%;
+            max-width: 500px;
+            box-shadow: var(--shadow-card);
+            animation: fadeInUp 0.5s ease both;
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(24px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        /* ── Logo / Icon area ─────────────────────────────────────── */
+        .logo-area {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 32px;
+        }
+
+        .logo-ring {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: var(--color-surface-2);
+            border: 1.5px solid var(--color-border-hover);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 18px;
+            box-shadow: var(--shadow-glow);
+            animation: pulse-glow 3s ease-in-out infinite;
+        }
+
+        @keyframes pulse-glow {
+            0%, 100% { box-shadow: 0 0 20px rgba(61,214,214,0.15); }
+            50%       { box-shadow: 0 0 40px rgba(61,214,214,0.35); }
+        }
+
+        .logo-ring svg { width: 38px; height: 38px; }
+
+        .card-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            letter-spacing: -0.025em;
+            color: var(--color-text);
+            text-align: center;
+        }
+
+        .card-subtitle {
+            margin-top: 6px;
+            font-size: 0.875rem;
+            color: var(--color-text-muted);
+            text-align: center;
+        }
+
+        /* ── Privacy badge ────────────────────────────────────────── */
+        .privacy-badge {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(61,214,214,0.06);
+            border: 1px solid rgba(61,214,214,0.15);
+            border-radius: 10px;
+            padding: 10px 14px;
+            margin-bottom: 28px;
+            font-size: 0.8125rem;
+            color: var(--color-accent);
+        }
+        .privacy-badge svg { flex-shrink: 0; }
+
+        /* ── Drop zone ────────────────────────────────────────────── */
+        .drop-zone {
+            border: 2px dashed var(--color-border-hover);
+            border-radius: 14px;
+            padding: 36px 24px;
+            text-align: center;
+            cursor: pointer;
+            transition: all var(--transition);
+            background: rgba(61,214,214,0.02);
+            position: relative;
+            margin-bottom: 20px;
+        }
+
+        .drop-zone:hover,
+        .drop-zone.drag-over {
+            border-color: var(--color-accent);
+            background: rgba(61,214,214,0.06);
+            box-shadow: 0 0 0 4px rgba(61,214,214,0.08);
+        }
+
+        .drop-zone.file-selected {
+            border-color: var(--color-success);
+            background: rgba(34,197,94,0.04);
+        }
+
+        .drop-zone input[type="file"] {
+            position: absolute;
+            inset: 0;
+            opacity: 0;
+            cursor: pointer;
+            width: 100%;
+            height: 100%;
+        }
+
+        .drop-icon { margin-bottom: 12px; }
+        .drop-icon svg { width: 44px; height: 44px; }
+
+        .drop-primary {
+            font-size: 0.9375rem;
+            font-weight: 600;
+            color: var(--color-text);
+            margin-bottom: 4px;
+        }
+
+        .drop-secondary {
+            font-size: 0.8125rem;
+            color: var(--color-text-muted);
+        }
+
+        .file-info {
+            display: none;
+            align-items: center;
+            gap: 10px;
+            margin-top: 14px;
+            padding: 10px 14px;
+            background: var(--color-surface-2);
+            border-radius: 10px;
+            font-size: 0.8125rem;
+        }
+
+        .file-info.visible { display: flex; }
+        .file-name { flex: 1; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .file-size { color: var(--color-text-muted); flex-shrink: 0; }
+        .file-remove {
+            background: none; border: none; cursor: pointer;
+            color: var(--color-text-muted); padding: 2px;
+            display: flex; align-items: center;
+            transition: color var(--transition);
+        }
+        .file-remove:hover { color: var(--color-error); }
+
+        /* ── Submit button ────────────────────────────────────────── */
+        .btn-submit {
+            width: 100%;
+            padding: 15px 24px;
+            background: linear-gradient(135deg, var(--color-accent) 0%, var(--color-accent-dark) 100%);
+            color: #0a0e1a;
+            font-family: var(--font);
+            font-size: 0.9375rem;
+            font-weight: 700;
+            border: none;
+            border-radius: var(--radius-btn);
+            cursor: pointer;
+            transition: all var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            letter-spacing: 0.01em;
+        }
+
+        .btn-submit:hover:not(:disabled) {
+            transform: translateY(-1px);
+            box-shadow: 0 8px 24px rgba(61,214,214,0.3);
+        }
+
+        .btn-submit:active:not(:disabled) { transform: translateY(0); }
+
+        .btn-submit:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        /* ── Progress bar ─────────────────────────────────────────── */
+        .progress-wrap {
+            display: none;
+            flex-direction: column;
+            gap: 8px;
+            margin-top: 16px;
+        }
+        .progress-wrap.visible { display: flex; }
+        .progress-label {
+            font-size: 0.8125rem;
+            color: var(--color-text-muted);
+            display: flex;
+            justify-content: space-between;
+        }
+        .progress-bar-track {
+            height: 6px;
+            background: var(--color-surface-2);
+            border-radius: 99px;
+            overflow: hidden;
+        }
+        .progress-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--color-accent), var(--color-accent-dark));
+            border-radius: 99px;
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        /* ── Toast notifications ──────────────────────────────────── */
+        .toast-area {
+            position: fixed;
+            top: 24px;
+            right: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            z-index: 9999;
+            pointer-events: none;
+        }
+
+        .toast {
+            background: var(--color-surface);
+            border: 1px solid var(--color-border);
+            border-radius: 12px;
+            padding: 14px 18px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            max-width: 380px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+            animation: toastIn 0.3s ease both;
+            pointer-events: auto;
+            font-size: 0.875rem;
+        }
+
+        .toast.success { border-color: rgba(34,197,94,0.3); }
+        .toast.error   { border-color: rgba(248,113,113,0.3); }
+
+        @keyframes toastIn {
+            from { opacity: 0; transform: translateX(24px); }
+            to   { opacity: 1; transform: translateX(0); }
+        }
+
+        /* ── Success overlay ──────────────────────────────────────── */
+        .success-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(10, 14, 26, 0.95);
+            z-index: 1000;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+            animation: overlayIn 0.4s ease;
+        }
+        .success-overlay.visible { display: flex; }
+
+        @keyframes overlayIn {
+            from { opacity: 0; }
+            to   { opacity: 1; }
+        }
+
+        .success-icon {
+            width: 96px;
+            height: 96px;
+            background: var(--color-success-bg);
+            border: 2px solid var(--color-success);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: bounceIn 0.6s cubic-bezier(0.34,1.56,0.64,1);
+        }
+
+        @keyframes bounceIn {
+            from { transform: scale(0.3); opacity: 0; }
+            to   { transform: scale(1); opacity: 1; }
+        }
+
+        .success-title {
+            font-size: 1.625rem;
+            font-weight: 700;
+            color: var(--color-text);
+        }
+        .success-sub {
+            font-size: 0.9375rem;
+            color: var(--color-text-muted);
+            text-align: center;
+            max-width: 320px;
+            line-height: 1.6;
+        }
+        .success-note {
+            font-size: 0.8125rem;
+            color: var(--color-warning);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 10px 16px;
+            background: rgba(251,191,36,0.08);
+            border: 1px solid rgba(251,191,36,0.2);
+            border-radius: 10px;
+        }
+
+        /* ── Footer ───────────────────────────────────────────────── */
+        .footer {
+            margin-top: 24px;
+            font-size: 0.75rem;
+            color: var(--color-text-muted);
+            text-align: center;
+            z-index: 1;
+            position: relative;
+        }
+
+        /* ── Spinner ──────────────────────────────────────────────── */
+        .spinner {
+            width: 18px; height: 18px;
+            border: 2px solid rgba(10,14,26,0.3);
+            border-top-color: #0a0e1a;
+            border-radius: 50%;
+            animation: spin 0.7s linear infinite;
+            display: none;
+        }
+        .spinner.visible { display: block; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+
+<!-- ── Toast Area ─────────────────────────────────────────────────── -->
+<div class="toast-area" id="toastArea" aria-live="polite"></div>
+
+<!-- ── Success Overlay ───────────────────────────────────────────── -->
+<div class="success-overlay" id="successOverlay" role="alertdialog" aria-label="Print successful">
+    <div class="success-icon">
+        <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="20 6 9 17 4 12"/>
+        </svg>
+    </div>
+    <div class="success-title">Document Sent to Printer</div>
+    <div class="success-sub">Your PDF has been queued for printing. Your file was never stored — it has been permanently erased from memory.</div>
+    <div class="success-note">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+        </svg>
+        You are being disconnected from this network.
+    </div>
+</div>
+
+<!-- ── Main Card ─────────────────────────────────────────────────── -->
+<main class="card" id="mainCard">
+    <!-- Logo -->
+    <div class="logo-area">
+        <div class="logo-ring">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#3dd6d6" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="6 9 6 2 18 2 18 9"/>
+                <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/>
+                <rect x="6" y="14" width="12" height="8"/>
+            </svg>
+        </div>
+        <h1 class="card-title">Secure Print Portal</h1>
+        <p class="card-subtitle">Upload your document — we print it, then erase it.</p>
+    </div>
+
+    <!-- Privacy Badge -->
+    <div class="privacy-badge">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+        </svg>
+        <span>Zero-retention: your PDF is held in RAM only and erased immediately after printing.</span>
+    </div>
+
+    <!-- Upload Form -->
+    <form id="printForm" novalidate>
+        <!-- Drop Zone -->
+        <div class="drop-zone" id="dropZone" role="button" aria-label="Upload PDF file" tabindex="0">
+            <input type="file" id="fileInput" name="file" accept=".pdf,application/pdf" aria-label="Select PDF file" required/>
+            <div class="drop-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="#3dd6d6" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                    <polyline points="17 8 12 3 7 8"/>
+                    <line x1="12" y1="3" x2="12" y2="15"/>
+                </svg>
+            </div>
+            <p class="drop-primary">Drop your PDF here or click to browse</p>
+            <p class="drop-secondary" th:text="'PDF only · Max ' + ${maxSizeMb} + ' MB'">PDF only · Max 10 MB</p>
+        </div>
+
+        <!-- Selected file info -->
+        <div class="file-info" id="fileInfo" aria-live="polite">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#3dd6d6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/>
+            </svg>
+            <span class="file-name" id="fileName">—</span>
+            <span class="file-size" id="fileSize"></span>
+            <button type="button" class="file-remove" id="fileRemove" aria-label="Remove file">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+                </svg>
+            </button>
+        </div>
+
+        <!-- Submit -->
+        <div style="margin-top: 20px;">
+            <button type="submit" class="btn-submit" id="submitBtn" disabled>
+                <svg id="btnIcon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/>
+                </svg>
+                <div class="spinner" id="spinner"></div>
+                <span id="btnLabel">Print Document</span>
+            </button>
+        </div>
+
+        <!-- Progress -->
+        <div class="progress-wrap" id="progressWrap">
+            <div class="progress-label">
+                <span id="progressText">Uploading…</span>
+                <span id="progressPct">0%</span>
+            </div>
+            <div class="progress-bar-track">
+                <div class="progress-bar-fill" id="progressFill"></div>
+            </div>
+        </div>
+    </form>
+</main>
+
+<footer class="footer">
+    <p>This portal is operated on a secured local network. No data leaves this device.</p>
+</footer>
+
+<script>
+(function () {
+    'use strict';
+
+    const MAX_SIZE_BYTES = 10 * 1024 * 1024; // 10 MB
+
+    // ── Element refs ────────────────────────────────────────────────
+    const form        = document.getElementById('printForm');
+    const dropZone    = document.getElementById('dropZone');
+    const fileInput   = document.getElementById('fileInput');
+    const fileInfo    = document.getElementById('fileInfo');
+    const fileName    = document.getElementById('fileName');
+    const fileSize    = document.getElementById('fileSize');
+    const fileRemove  = document.getElementById('fileRemove');
+    const submitBtn   = document.getElementById('submitBtn');
+    const btnLabel    = document.getElementById('btnLabel');
+    const spinner     = document.getElementById('spinner');
+    const btnIcon     = document.getElementById('btnIcon');
+    const progressWrap= document.getElementById('progressWrap');
+    const progressFill= document.getElementById('progressFill');
+    const progressText= document.getElementById('progressText');
+    const progressPct = document.getElementById('progressPct');
+    const toastArea   = document.getElementById('toastArea');
+    const successOver = document.getElementById('successOverlay');
+
+    let selectedFile = null;
+
+    // ── Drag & Drop ─────────────────────────────────────────────────
+    ['dragenter', 'dragover'].forEach(evt =>
+        dropZone.addEventListener(evt, e => { e.preventDefault(); dropZone.classList.add('drag-over'); }));
+    ['dragleave', 'drop'].forEach(evt =>
+        dropZone.addEventListener(evt, e => { e.preventDefault(); dropZone.classList.remove('drag-over'); }));
+    dropZone.addEventListener('drop', e => {
+        const files = e.dataTransfer.files;
+        if (files.length > 0) processFile(files[0]);
+    });
+
+    // Keyboard accessibility on drop zone
+    dropZone.addEventListener('keydown', e => {
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); fileInput.click(); }
+    });
+
+    fileInput.addEventListener('change', () => {
+        if (fileInput.files.length > 0) processFile(fileInput.files[0]);
+    });
+
+    fileRemove.addEventListener('click', clearFile);
+
+    // ── File processing ─────────────────────────────────────────────
+    function processFile(file) {
+        // Client-side validation (server re-validates everything)
+        if (!file.name.toLowerCase().endsWith('.pdf') || file.type !== 'application/pdf') {
+            showToast('error', 'Only PDF files are accepted.');
+            return;
+        }
+        if (file.size > MAX_SIZE_BYTES) {
+            showToast('error', 'File exceeds the 10 MB size limit.');
+            return;
+        }
+        if (file.size === 0) {
+            showToast('error', 'The selected file is empty.');
+            return;
+        }
+
+        selectedFile = file;
+        fileName.textContent = file.name;
+        fileSize.textContent = formatBytes(file.size);
+        fileInfo.classList.add('visible');
+        dropZone.classList.add('file-selected');
+        submitBtn.disabled = false;
+    }
+
+    function clearFile() {
+        selectedFile = null;
+        fileInput.value = '';
+        fileInfo.classList.remove('visible');
+        dropZone.classList.remove('file-selected');
+        submitBtn.disabled = true;
+    }
+
+    // ── Form submission ─────────────────────────────────────────────
+    form.addEventListener('submit', async e => {
+        e.preventDefault();
+        if (!selectedFile) return;
+
+        setLoading(true);
+
+        const formData = new FormData();
+        formData.append('file', selectedFile, selectedFile.name);
+
+        try {
+            const response = await uploadWithProgress(formData);
+            const data = await response.json();
+
+            if (response.ok && data.status === 'success') {
+                successOver.classList.add('visible');
+                // Attempt to close/disconnect gracefully after 4 s
+                setTimeout(() => {
+                    try { window.close(); } catch (_) {}
+                }, 4000);
+            } else {
+                const msg = (data && data.message) ? data.message : 'An error occurred. Please try again.';
+                showToast('error', msg);
+                setLoading(false);
+            }
+        } catch (err) {
+            showToast('error', 'Connection error. Please check the portal is reachable.');
+            setLoading(false);
+        }
+    });
+
+    function uploadWithProgress(formData) {
+        return new Promise((resolve, reject) => {
+            const xhr = new XMLHttpRequest();
+            xhr.open('POST', '/api/print');
+
+            xhr.upload.addEventListener('progress', e => {
+                if (e.lengthComputable) {
+                    const pct = Math.round((e.loaded / e.total) * 100);
+                    progressFill.style.width = pct + '%';
+                    progressPct.textContent = pct + '%';
+                    if (pct === 100) {
+                        progressText.textContent = 'Processing…';
+                    }
+                }
+            });
+
+            xhr.addEventListener('load', () => {
+                // Wrap XHR response in a fetch-like object
+                resolve({
+                    ok: xhr.status >= 200 && xhr.status < 300,
+                    status: xhr.status,
+                    json: () => {
+                        try { return Promise.resolve(JSON.parse(xhr.responseText)); }
+                        catch (_) { return Promise.resolve({}); }
+                    }
+                });
+            });
+
+            xhr.addEventListener('error', () => reject(new Error('Network error')));
+            xhr.addEventListener('abort', () => reject(new Error('Upload aborted')));
+
+            progressWrap.classList.add('visible');
+            xhr.send(formData);
+        });
+    }
+
+    // ── UI state helpers ────────────────────────────────────────────
+    function setLoading(loading) {
+        submitBtn.disabled = loading;
+        btnIcon.style.display = loading ? 'none' : 'block';
+        spinner.classList.toggle('visible', loading);
+        btnLabel.textContent = loading ? 'Printing…' : 'Print Document';
+        if (!loading) progressWrap.classList.remove('visible');
+    }
+
+    function showToast(type, message) {
+        const toast = document.createElement('div');
+        toast.className = 'toast ' + type;
+        const icon = type === 'success'
+            ? '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>'
+            : '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#f87171" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>';
+        toast.innerHTML = icon + '<span>' + escapeHtml(message) + '</span>';
+        toastArea.appendChild(toast);
+        setTimeout(() => toast.remove(), 5000);
+    }
+
+    function escapeHtml(str) {
+        return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+
+    function formatBytes(bytes) {
+        if (bytes < 1024) return bytes + ' B';
+        if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+        return (bytes / (1024 * 1024)).toFixed(2) + ' MB';
+    }
+})();
+</script>
+</body>
+</html>
